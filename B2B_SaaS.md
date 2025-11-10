@@ -1,6 +1,4 @@
-Here is the fully formatted, structured, and polished document for your StockFlow B2B Inventory Management System assessment, suitable for submission as an internship assignment.
 
------
 
 # 📝 StockFlow B2B Inventory Management System Assessment
 
