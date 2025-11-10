@@ -1,5 +1,4 @@
 
-````markdown
 # 📝 StockFlow B2B Inventory Management System Assessment
 
 This document contains the solutions, database design, and API implementation for the three parts of the StockFlow take-home exercise, along with explicit reasoning and documented assumptions.
@@ -12,12 +11,12 @@ The following analysis addresses the issues in the provided Python/Flask `create
 
 ### 🛑 Identified Issues and Impact
 
-| Issue Type | Problem | Impact in Production |
-| :--- | :--- | :--- |
-| **Technical/Safety** | **Lack of Input Validation/Error Handling:** Code blindly accesses `data['key']`. | A missing required field (e.g., `'name'`) results in a **500 Internal Server Error** instead of a clean **400 Bad Request** response. |
-| **Business Logic/Constraint** | **No SKU Uniqueness Check:** The code doesn't verify if the `sku` already exists. | If a unique constraint is set in the database, the transaction fails with an **Integrity Error**. If not, it creates **duplicate SKUs**, leading to corrupted inventory tracking. |
-| **Business Logic/Atomicity** | **Two Separate `db.session.commit()` calls.** | If the first commit succeeds but the second fails (e.g., due to an invalid `warehouse_id`), the **Product is created** but the **Inventory record is missing**, resulting in an inconsistent data state. |
-| **Business Logic/Data Integrity** | **Implicit 1:1 Mapping:** `Product` is initialized with `warehouse_id`. | The product is incorrectly tied to a single warehouse, contradicting the requirement that **"Products can exist in multiple warehouses."** `warehouse_id` belongs only in the `Inventory` table. |
+| Issue Type                        | Problem                                                                           | Impact in Production                                                                                                                                                                                     |
+| :-------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Technical/Safety**              | **Lack of Input Validation/Error Handling:** Code blindly accesses `data['key']`. | A missing required field (e.g., `'name'`) results in a **500 Internal Server Error** instead of a clean **400 Bad Request** response.                                                                    |
+| **Business Logic/Constraint**     | **No SKU Uniqueness Check:** The code doesn't verify if the `sku` already exists. | If a unique constraint is set in the database, the transaction fails with an **Integrity Error**. If not, it creates **duplicate SKUs**, leading to corrupted inventory tracking.                        |
+| **Business Logic/Atomicity**      | **Two Separate `db.session.commit()` calls.**                                     | If the first commit succeeds but the second fails (e.g., due to an invalid `warehouse_id`), the **Product is created** but the **Inventory record is missing**, resulting in an inconsistent data state. |
+| **Business Logic/Data Integrity** | **Implicit 1:1 Mapping:** `Product` is initialized with `warehouse_id`.           | The product is incorrectly tied to a single warehouse, contradicting the requirement that **"Products can exist in multiple warehouses."** `warehouse_id` belongs only in the `Inventory` table.         |
 
 ### ✅ Corrected Endpoint Implementation (Python/Flask)
 
@@ -65,7 +64,7 @@ def create_product():
         # Rollback on Failure: Prevents inconsistent data state.
         db.session.rollback()
         return {"error": "An unexpected error occurred during product creation."}, 500
-````
+```
 
 ---
 
@@ -286,4 +285,5 @@ app.get('/api/companies/:company_id/alerts/low-stock', async (req, res) => {
 2. **Velocity Calculation:** `salesVelocityQuery` computes 30-day sales volume per product/warehouse pair.
 3. **Urgency Metric:** `days_until_stockout` helps prioritize reordering.
 4. **Error Handling:** Covers invalid input (400), empty results, and internal errors (500).
+
 
